@@ -1,0 +1,16 @@
+{
+  "sentiment": "negative",
+  "confidence_scores": {
+    "positive": 0.01,
+    "neutral": 0.06,
+    "negative": 0.93
+  },
+  "key_phrases": [
+    "últimos dias",
+    "Doutor",
+    "32ª semana",
+    "Acordo",
+    "noite"
+  ],
+  "status": "success"
+}

@@ -1,0 +1,6 @@
+# Evolução clínica sintética
+Dia 1: Paciente estável, sem queixas.
+Dia 2: Leve desconforto, sem sinais de alarme.
+Dia 3: Relata cansaço ao caminhar.
+Dia 4: Apresentou falta de ar ao subir escada.
+Dia 5: Piora súbita — dor no peito e tontura. Acionar equipe.

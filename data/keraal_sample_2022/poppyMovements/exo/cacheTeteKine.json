@@ -1,0 +1,44 @@
+{
+    "nb_fichiers": 6, 
+    "fichier2": {
+        "pause": 0, 
+        "vitesse": 5, 
+        "namefile": "cacheTeteInspi"
+    }, 
+    "fichier3": {
+        "pause": 1, 
+        "vitesse": 5, 
+        "namefile": "cacheTeteInspiRev"
+    }, 
+    "fichier1": {
+        "pause": 2, 
+        "vitesse": 5, 
+        "namefile": "cacheTeteBras"
+    }, 
+    "fichier6": {
+        "pause": 5, 
+        "vitesse": 5, 
+        "namefile": "cacheTeteBrasRev"
+    }, 
+    "fichier4": {
+        "pause": 0, 
+        "vitesse": 5, 
+        "namefile": "cacheTeteInspi"
+    }, 
+    "fichier5": {
+        "pause": 1, 
+        "vitesse": 5, 
+        "namefile": "cacheTeteInspiRev"
+    }, 
+    "type": "exo", 
+    "nb_temps": 143,
+	"description": {
+		"3": "cacheTeteInit.mp3",
+		"22": "cacheTeteInspi.mp3",
+		"49": "cacheTeteExpi.mp3",
+		"75": "inspire.mp3",
+		"105": "expire.mp3",
+		"126": "repos.mp3"
+	},
+	"instructions":["dos_droit","respiration"]
+}

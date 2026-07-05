@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotation>
+  <head>
+    <specification src="C:/Users/poppy/Desktop/label_video/keraalSpec.xml" />
+    <video src="C:/Users/poppy/Desktop/label_video/etirementsLaterauxKine/Vid007.avi" master="true" />
+    <info key="encoding" type="String">UTF-16</info>
+  </head>
+  <body>
+    <track name="Global evaluation" type="primary">
+      <el index="0" start="0" end="37.33">
+        <attribute name="evaluation">Incomplete</attribute>
+        <comment>manque le retour de la seconde partie</comment>
+      </el>
+    </track>
+    <track name="Global error" type="primary">
+      <el index="0" start="0" end="37.33">
+        <attribute name="type">none</attribute>
+      </el>
+    </track>
+  </body>
+</annotation>
+

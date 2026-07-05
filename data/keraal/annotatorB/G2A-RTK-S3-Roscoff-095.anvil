@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotation>
+  <head>
+    <specification src="C:/Users/poppy/Desktop/label_video/keraalSpec.xml" />
+    <video src="C:/Users/poppy/Desktop/label_video/rotationTroncKine/Vid095.avi" master="true" />
+    <info key="encoding" type="String">UTF-16</info>
+  </head>
+  <body>
+    <track name="Global evaluation" type="primary">
+      <el index="0" start="0" end="26.07">
+        <attribute name="evaluation">Incorrect</attribute>
+      </el>
+    </track>
+    <track name="Global error" type="primary">
+      <el index="0" start="0" end="26.07">
+        <attribute name="Evaluation">SmallError</attribute>
+        <attribute name="type">Error1</attribute>
+        <attribute name="bodyPart">BothArms</attribute>
+        <comment>mauvaise simulation. Les bras sont pliés et il y a probablement une moindre rotation de la colonne vertébrale sur la première rotation. Aucun intéret au regard de ce que font les patients.</comment>
+      </el>
+    </track>
+  </body>
+</annotation>
+

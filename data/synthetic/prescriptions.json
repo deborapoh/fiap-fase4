@@ -1,0 +1,32 @@
+[
+  {
+    "day": 1,
+    "drug": "dipirona",
+    "dose_mg": 500
+  },
+  {
+    "day": 2,
+    "drug": "dipirona",
+    "dose_mg": 500
+  },
+  {
+    "day": 3,
+    "drug": "dipirona",
+    "dose_mg": 1000
+  },
+  {
+    "day": 4,
+    "drug": "dipirona",
+    "dose_mg": 1000
+  },
+  {
+    "day": 5,
+    "drug": "morfina",
+    "dose_mg": 5
+  },
+  {
+    "day": 6,
+    "drug": "morfina",
+    "dose_mg": 10
+  }
+]

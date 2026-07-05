@@ -1,0 +1,34 @@
+{
+    "nb_fichiers": 4, 
+    "fichier2": {
+        "pause": 1, 
+        "vitesse": 6, 
+        "namefile": "etirementLatGTRev"
+    }, 
+    "fichier3": {
+        "pause": 5, 
+        "vitesse": 5, 
+        "namefile": "etirementLatGTSym"
+    }, 
+    "fichier1": {
+        "pause": 5,
+        "vitesse": 5, 
+        "namefile": "etirementLatGT"
+    }, 
+    "fichier4": {
+        "pause": 2, 
+        "vitesse": 6, 
+        "namefile": "etirementLatGTRevSym"
+    }, 
+    "type": "exo", 
+    "nb_temps": 157,
+	"description":{
+		"0": "leveBrasDroitTendu.mp3",
+		"21": "etirementLateralD.mp3",
+		"49": "redresseEtBaisseBras.mp3",
+		"78": "leveBrasGaucheTendu.mp3",
+		"98": "etirementLateralG.mp3",
+		"127": "redresseEtBaisseBras.mp3"
+	},
+	"instructions":["hanches_fixes","fesses_plat","pieds_plat","respiration"]
+}

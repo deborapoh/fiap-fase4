@@ -1,0 +1,12 @@
+{
+  "sentiment": "neutral",
+  "confidence_scores": {
+    "positive": 0.14,
+    "neutral": 0.83,
+    "negative": 0.03
+  },
+  "key_phrases": [
+    "Doutora"
+  ],
+  "status": "success"
+}

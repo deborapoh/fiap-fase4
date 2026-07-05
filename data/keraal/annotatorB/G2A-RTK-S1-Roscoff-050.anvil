@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotation>
+	<head>
+		<specification src="../keraalSpec.xml" />
+		<video src="Vid050.avi" master="true" />
+		<info key="encoding" type="String">UTF-16</info>
+	</head>
+	<body>
+		<track name="Global evaluation" type="primary">
+			<el index="0" start="0" end="tart:">
+				<attribute name="evaluation">Correct</attribute>
+			</el>
+		</track>
+		<track name="Global error" type="primary">
+			<el index="0" start="0" end="tart:">
+				<attribute name="type">none</attribute>
+			</el>
+		</track>
+	</body>
+</annotation>

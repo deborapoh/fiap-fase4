@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotation>
+  <head>
+    <specification src="C:/Users/poppy/Desktop/label_video/keraalSpec.xml" />
+    <video src="C:/Users/poppy/Desktop/label_video/rotationTroncKine/Vid062.avi" master="true" />
+    <info key="encoding" type="String">UTF-16</info>
+  </head>
+  <body>
+    <track name="Global evaluation" type="primary">
+      <el index="0" start="0" end="28.2">
+        <attribute name="evaluation">Incorrect</attribute>
+      </el>
+    </track>
+    <track name="Global error" type="primary">
+      <el index="0" start="0" end="28.2">
+        <attribute name="Evaluation">SmallError</attribute>
+        <attribute name="type">Error1</attribute>
+        <attribute name="bodyPart">BothArms</attribute>
+      </el>
+    </track>
+  </body>
+</annotation>
+
