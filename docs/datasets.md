@@ -7,10 +7,10 @@ Esta pagina alimenta a secao de desvios de escopo do relatorio tecnico.
 
 | Frente | Dataset | Situacao | Tamanho local |
 |---|---|---|---|
-| Video | Keraal (IMT Atlantique / CHRU Brest) | Baixado | 1,7 GB |
-| Audio | TORGO (University of Toronto), via Hugging Face | Baixado, amostra de 80 audios | 10 MB |
-| Sinais vitais | BIDMC PPG and Respiration (PhysioNet) | Em download | ~500 MB |
-| Prescricoes | MIMIC-IV Clinical Database Demo (PhysioNet) | Em download | 15 MB |
+| Video | Keraal (IMT Atlantique / CHRU Brest) | Baixado | 4,7 GB |
+| Audio | TORGO (University of Toronto), via Hugging Face | Baixado, amostra pareada de 80 audios | 25 MB |
+| Sinais vitais | BIDMC PPG and Respiration (PhysioNet) | Baixado e extraido | 417 MB |
+| Prescricoes | MIMIC-IV Clinical Database Demo (PhysioNet) | Baixado e extraido | 130 MB |
 
 Nenhum exige credenciamento. O comando `./scripts/download_datasets.sh todos`
 reproduz os downloads; `python scripts/download_torgo.py` refaz a amostra de audio.
@@ -88,6 +88,34 @@ percorrer quase o dataset inteiro para encontrar o segundo grupo.
 A amostra padrao e de 40 audios por grupo, WAV PCM 16 bits mono a 16 kHz, que e
 o formato nativo esperado pelos modelos de transcricao.
 
+### Por que a amostra e pareada
+
+A primeira versao do script pegava os N primeiros audios de cada grupo. Isso
+gerou uma comparacao invalida, e o erro so apareceu quando as metricas sairam
+com o sinal trocado: o grupo disartrico apresentava **menos** jitter e shimmer
+e HNR 90% **maior** que o controle, ou seja, voz aparentemente mais saudavel.
+
+A causa e a ordenacao do dataset. Os N primeiros de cada grupo caiam numa unica
+locutora saudavel (FC01, microfone de array) contra um unico locutor disartrico
+(M05, microfone de cabeca). Havia tres fontes de confusao empilhadas:
+
+- **Microfone**: o de array fica longe da boca e capta ruido de sala, o que
+  derruba o HNR e infla jitter e shimmer do grupo saudavel.
+- **Sexo**: uma mulher contra um homem explica sozinho a diferenca de f0
+  (190 Hz contra 121 Hz).
+- **Locutor unico**: nenhuma variabilidade individual nos dois lados.
+
+O amostrador atual controla as tres. So usa `headMic`, presente nos dois
+grupos; so usa frases ditas pelos dois grupos, entrando com um audio de cada
+lado, de modo que o conteudo fonetico e identico; e distribui a cota por sexo e
+por locutor, com rodizio. O resultado sao 40 frases de 7 a 14 palavras, cada
+uma falada pelos dois grupos, cobrindo os 15 locutores do corpus com a mesma
+proporcao de homens e mulheres nos dois lados.
+
+Fica registrado como aprendizado metodologico: em corpus clinico ordenado por
+sujeito, amostragem por ordem de arquivo mede o protocolo de gravacao, nao a
+patologia.
+
 Vale registrar uma limitacao: **as transcricoes do TORGO nao tem vocabulario
 clinico**. Os participantes leem frases do TIMIT, digitos e alfabeto
 radiofonico. Por isso a identificacao de termos criticos nao usa NER biomedico
@@ -101,12 +129,22 @@ traz frequencia cardiaca, frequencia respiratoria e SpO2 amostrados a 1 Hz, alem
 de ECG e PPG a 125 Hz e anotacoes manuais de respiracao feitas por dois
 anotadores. Vem em CSV, WFDB e MATLAB.
 
+Extraido em `data/raw/bidmc/bidmc-ppg-and-respiration-dataset-1.0.0/`. Para a
+deteccao de anomalias interessam os 53 arquivos
+`bidmc_csv/bidmc_##_Numerics.csv`, com as colunas `Time [s], HR, PULSE, RESP,
+SpO2`. Os sinais de alta frequencia estao nos `*_Signals.csv` e nos arquivos
+WFDB (`.dat`/`.hea`), que a lib `wfdb` le direto.
+
 ## Prescricoes: MIMIC-IV Demo
 
 Subconjunto aberto de 100 pacientes do MIMIC-IV, com o mesmo schema da base
 completa. Traz `prescriptions`, `pharmacy` e `poe`, que sustentam o requisito de
 detectar alteracoes inesperadas no tratamento, alem de `chartevents` e
 `transfers` para o contexto clinico.
+
+Extraido em `data/raw/mimic-iv-demo/mimic-iv-clinical-database-demo-2.2/`, com
+as tabelas em `.csv.gz` divididas entre `hosp/` (22 tabelas, inclui
+`prescriptions`) e `icu/` (9 tabelas).
 
 ## Citacoes obrigatorias
 
