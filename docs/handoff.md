@@ -3,6 +3,31 @@
 Documento de continuidade do Tech Challenge Fase 4. Leia junto com
 [datasets.md](datasets.md), que detalha as fontes de dados.
 
+## Ponto de retomada
+
+Ultima sessao: 26/07, fim da tarde. O que foi feito nela:
+
+- Pipeline de audio implementado e rodado ponta a ponta nos 80 audios.
+- Amostra do TORGO refeita porque a anterior invalidava a comparacao entre os
+  grupos (decisao 6 abaixo).
+- BIDMC e MIMIC-IV Demo baixados e extraidos. Nao falta mais nenhum download.
+- `.env` passou a ser lido de verdade, por `src/common/config.py`.
+
+Os commits da sessao (amostragem pareada do TORGO, pipeline de audio e esta
+atualizacao) estao apenas locais, **ainda nao enviados** ao remote; o
+`git status` mostra quantos. Rode `git push` quando quiser publicar, atento a
+questao das duas contas GitHub descrita mais abaixo.
+
+Uma pendencia mecanica: a execucao completa que regrava
+`data/processed/audio_metricas.csv` foi interrompida no meio. Se o arquivo
+tiver menos de 81 linhas (cabecalho mais 80 audios), refaca com
+`python scripts/analisar_audio.py`. Sao cerca de 7 minutos e nao depende de
+nada mais.
+
+**Proximo passo sugerido: o pipeline de anomalias** (`src/anomaly/`). Dos dois
+que faltam, e o mais barato: dados ja extraidos, tabulares, sem GPU e sem
+download. O de video exige processar 4,7 GB de MP4 com YOLOv8.
+
 ## O trabalho
 
 Sistema de monitoramento hospitalar multimodal. Os requisitos obrigatorios
@@ -177,6 +202,21 @@ O detector de termos trata negacao ("no pain" nao vira alerta) e contracao
 clinico, ele e exercitado pelas frases de `EXEMPLOS_CLINICOS`, no proprio
 modulo.
 
+### O que sai no CSV
+
+Uma linha por audio, em `data/processed/audio_metricas.csv`. A fusao vai
+consumir daqui, entao vale conhecer as colunas:
+
+| Grupo de colunas | Colunas |
+|---|---|
+| Identificacao | `arquivo`, `grupo`, `genero`, `falante`, `duracao_s` |
+| Acustica | `f0_media_hz`, `f0_desvio_hz`, `jitter_local`, `shimmer_local`, `hnr_db`, `proporcao_pausa`, `taxa_fala_silabas_s` |
+| Transcricao | `referencia`, `transcricao`, `wer`, `logprob_media`, `proporcao_sem_fala` |
+| Texto | `sentimento`, `sentimento_confianca`, `escore_criticidade`, `severidade_maxima`, `categorias`, `termos_criticos`, `n_termos_criticos`, `n_termos_negados` |
+
+O `escore_criticidade` ja vem normalizado de 0 a 1 e e o candidato natural a
+entrar como componente de audio no score de risco da fusao.
+
 ### Resultados, grupo disartrico contra controle
 
 Comparacao com Mann-Whitney, 40 audios por grupo:
@@ -213,10 +253,33 @@ execucao de paciente contra saudavel e gerar relatorio automatico de desvios.
 Validar contra as anotacoes dos medicos (que dao o rotulo verdadeiro, o erro
 e a janela temporal).
 
+Comece pelo parser das anotacoes `.anvil`, nao pelo modelo: e ele que define o
+alvo. Sao **XML em UTF-16** (`open(..., encoding='utf-16')`), um par de
+arquivos por gravacao, um medico em cada. Onde os dois discordam, ou se usa
+apenas o consenso, ou se registra a discordancia como incerteza; e uma escolha
+que precisa aparecer no relatorio.
+
 **Anomalias** (`src/anomaly/`): Isolation Forest como baseline e autoencoder
 LSTM nas series de HR/RR/SpO2 do BIDMC (1 Hz, use a lib `wfdb` ou os CSVs
 `bidmc_##_Numerics.csv`). Alteracoes inesperadas na tabela `prescriptions` do
 MIMIC demo.
+
+Detalhes ja levantados dos dados, para nao perder tempo:
+
+- Cada `bidmc_##_Numerics.csv` tem 481 linhas, ou seja 8 minutos a 1 Hz, e sao
+  53 pacientes. Da uma matriz pequena: cabe inteira em memoria.
+- **Os nomes das colunas tem espaco a esquerda**: `Time [s]`, ` HR`, ` PULSE`,
+  ` RESP`, ` SpO2`. Leia com `skipinitialspace=True` ou renomeie, senao
+  `df.HR` falha.
+- Ha faltantes, concentrados em `PULSE` e `SpO2` (13 de 481 no paciente 01).
+  Decida entre interpolar ou mascarar antes de treinar, e registre a escolha.
+- O BIDMC **nao tem rotulo de anomalia**. A validacao tera que ser por
+  inspecao dos eventos detectados contra o sinal, ou por anomalia injetada
+  artificialmente. Vale decidir isso antes de escrever o modelo, porque muda o
+  que o pipeline precisa devolver.
+- No MIMIC as tabelas sao `.csv.gz` em
+  `data/raw/mimic-iv-demo/mimic-iv-clinical-database-demo-2.2/hosp/`. O pandas
+  le direto, sem descompactar.
 
 ### Fase 3
 
