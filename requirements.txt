@@ -1,0 +1,44 @@
+# Tech Challenge Fase 4 - dependencias diretas
+# Python 3.11 (torch/ultralytics/faster-whisper ainda nao suportam 3.14)
+# Instalacao: python -m pip install -r requirements.txt
+#             python -m spacy download en_core_web_sm
+
+# Base numerica e dados
+numpy==2.4.6
+pandas==3.0.5
+scipy==1.17.1
+scikit-learn==1.9.0
+
+# Visualizacao e relatorios
+matplotlib==3.11.1
+seaborn==0.13.2
+
+# Deep learning (MPS habilitado em Apple Silicon)
+torch==2.13.0
+transformers==5.14.1
+
+# Audio: transcricao e features acusticas
+faster-whisper==1.2.1
+librosa==0.11.0
+soundfile==0.14.0
+
+# Video: deteccao de objetos e estimativa de pose
+ultralytics==8.4.107
+opencv-python==5.0.0.93
+
+# NLP: termos criticos via EntityRuler
+spacy==3.8.14
+
+# Sinais vitais em formato WFDB (PhysioNet)
+wfdb==4.3.1
+
+# Camada gerenciada em nuvem e download de datasets
+huggingface_hub==1.24.0
+datasets==5.0.0
+
+# App de demonstracao
+streamlit==1.60.0
+
+# Utilitarios
+tqdm==4.69.1
+python-dotenv==1.2.2

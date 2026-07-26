@@ -1,0 +1,38 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Datasets: KIMORE e TORGO somam dezenas de GB, nunca versionar
+# Usa data/* (nao data/) para que as excecoes .gitkeep sejam avaliadas
+data/*
+!data/.gitkeep
+!data/raw/
+data/raw/*
+!data/raw/.gitkeep
+!data/processed/
+data/processed/*
+!data/processed/.gitkeep
+
+# Pesos de modelos baixados em runtime (YOLO, Whisper)
+models/
+*.pt
+*.onnx
+
+# Saidas geradas
+reports/figures/*
+!reports/figures/.gitkeep
+outputs/
+
+# Credenciais
+.env
+*.key
+
+# macOS
+.DS_Store
