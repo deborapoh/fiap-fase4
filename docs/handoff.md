@@ -18,11 +18,10 @@ atualizacao) estao apenas locais, **ainda nao enviados** ao remote; o
 `git status` mostra quantos. Rode `git push` quando quiser publicar, atento a
 questao das duas contas GitHub descrita mais abaixo.
 
-Uma pendencia mecanica: a execucao completa que regrava
-`data/processed/audio_metricas.csv` foi interrompida no meio. Se o arquivo
-tiver menos de 81 linhas (cabecalho mais 80 audios), refaca com
-`python scripts/analisar_audio.py`. Sao cerca de 7 minutos e nao depende de
-nada mais.
+`data/processed/audio_metricas.csv` esta atualizado: 80 linhas, 25 colunas, os
+15 locutores. Ele nao e versionado (`data/` esta no `.gitignore`), entao numa
+maquina nova sera preciso refazer com `python scripts/analisar_audio.py`, cerca
+de 7 minutos.
 
 **Proximo passo sugerido: o pipeline de anomalias** (`src/anomaly/`). Dos dois
 que faltam, e o mais barato: dados ja extraidos, tabulares, sem GPU e sem
