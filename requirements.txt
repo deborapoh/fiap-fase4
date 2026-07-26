@@ -21,6 +21,10 @@ transformers==5.14.1
 faster-whisper==1.2.1
 librosa==0.11.0
 soundfile==0.14.0
+# jitter, shimmer e HNR pelo Praat, que e a referencia clinica dessas medidas
+praat-parselmouth==0.4.7
+# taxa de erro de palavra entre transcricao e referencia
+jiwer==4.0.0
 
 # Video: deteccao de objetos e estimativa de pose
 ultralytics==8.4.107

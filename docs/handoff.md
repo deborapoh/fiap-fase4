@@ -71,6 +71,14 @@ faster-whisper. A venv usa `/opt/homebrew/bin/python3.11` (3.11.9). Ha quatro
 instalacoes de 3.11 na maquina; **sempre usar o caminho absoluto** do
 Homebrew.
 
+### 6. Amostra do TORGO e pareada por frase
+
+A amostragem por ordem de arquivo produzia uma comparacao invalida (um unico
+locutor por grupo, sexos diferentes, microfones diferentes) e as metricas saiam
+com o sinal trocado. O amostrador atual pareia por frase e controla microfone,
+sexo e locutor. O racional completo esta em [datasets.md](datasets.md); vale
+para a secao de metodologia do relatorio.
+
 ## Estado do ambiente
 
 ```bash
@@ -81,7 +89,30 @@ source .venv/bin/activate    # Python 3.11.9
 Dependencias em [requirements.txt](../requirements.txt), todas instaladas e
 com imports verificados. `pip check` limpo. Destaques: torch 2.13 com **MPS
 disponivel** (aceleracao Apple Silicon), faster-whisper 1.2.1,
-ultralytics 8.4.107, opencv 5.0, spacy 3.8.14 com `en_core_web_sm`.
+ultralytics 8.4.107, opencv 5.0, spacy 3.8.14 com `en_core_web_sm`,
+praat-parselmouth 0.4.7 e jiwer 4.0.
+
+O `.env` e lido por [src/common/config.py](../src/common/config.py). Modulo que
+depende de variavel de ambiente deve importar as constantes de la, e nao chamar
+`os.getenv` direto, senao o valor do arquivo e ignorado. O cache de modelos
+(`HF_HOME`) aponta para `models/hf`, que ja tem os pesos do Whisper large-v3, do
+Whisper small, do distilbert de sentimento e os shards do TORGO: 5,1 GB, fora
+do versionamento.
+
+### Duas armadilhas do ambiente
+
+**Encoding.** O editor grava arquivos novos em UTF-16, que o Python rejeita com
+"source code string cannot contain null bytes". Depois de criar ou editar
+arquivo pelo agente, rode `python scripts/normalizar_encoding.py`. Com
+`--verificar` ele so aponta, sem alterar, o que serve para hook de commit.
+
+**Bus error no transformers.** O `from_pretrained` deixa os pesos como vistas
+do arquivo `.safetensors` mapeado em memoria, e nesta combinacao de torch com
+Apple Silicon a multiplicacao de matrizes sobre essas vistas derruba o processo
+com bus error (SIGBUS). Ler os pesos funciona; so o kernel de GEMM falha. A
+saida e copiar os tensores com `clone` logo apos carregar, como esta em
+`carregar_classificador_sentimento`. `low_cpu_mem_usage=False` e `dtype`
+explicito nao resolvem.
 
 ### Git
 
@@ -99,10 +130,10 @@ Tudo em `data/raw/`, ignorado pelo git. Reproduzivel com
 
 | Frente | Dataset | Estado |
 |---|---|---|
-| Video | Keraal grupos 1A e 2A | 4,3 GB. 299 videos MP4, 301 JSONs OpenPose, 301 BlazePose, 51 Kinect, 302 anotacoes por medico (2 medicos) |
-| Audio | TORGO via Hugging Face | 80 WAVs (40 disartricos, 40 controle) + `manifesto.csv` |
-| Sinais vitais | BIDMC | `bidmc-1.0.0.zip`, 43 MB, **ainda nao extraido** |
-| Prescricoes | MIMIC-IV Demo | **ainda nao baixado** |
+| Video | Keraal grupos 1A e 2A | 4,7 GB. 299 videos MP4, 301 JSONs OpenPose, 301 BlazePose, 51 Kinect, 302 anotacoes por medico (2 medicos) |
+| Audio | TORGO via Hugging Face | 80 WAVs pareados (40 frases, cada uma dita pelos dois grupos) + `manifesto.csv` |
+| Sinais vitais | BIDMC | Extraido, 417 MB. 53 pacientes, `bidmc_csv/bidmc_##_Numerics.csv` com HR, PULSE, RESP e SpO2 a 1 Hz |
+| Prescricoes | MIMIC-IV Demo | Extraido, 130 MB. 22 tabelas em `hosp/` (inclui `prescriptions`) e 9 em `icu/` |
 
 Ha tambem `kimore_ex1_apenas_esqueleto.zip` (37 MB), resquicio do mirror do
 Zenodo. Contem apenas features de esqueleto do exercicio 1 com scores
@@ -129,23 +160,52 @@ Anotacoes tem tres trilhas: `Global evaluation` (Correct, Incorrect,
 Incomplete, Motionless), `Global error` e `Temporal error`, as duas ultimas
 com severidade, tipo de erro e parte do corpo. Os XMLs sao **UTF-16**.
 
+## Pipeline de audio: pronto
+
+Roda com `python scripts/analisar_audio.py` (cerca de 7 minutos nos 80 audios
+com o large-v3 em CPU) e escreve `data/processed/audio_metricas.csv`. Aceita
+`--modelo` e `--limite N` para teste rapido.
+
+| Modulo | O que faz |
+|---|---|
+| `src/audio/transcricao.py` | faster-whisper, no lugar do Azure Speech to Text. Guarda tambem a logprob media dos segmentos, que cai quando o modelo tem dificuldade de reconhecer a fala |
+| `src/audio/metricas_vocais.py` | jitter, shimmer, HNR, f0, pausa e taxa de fala pelo Praat (parselmouth) |
+| `src/audio/analise_texto.py` | sentimento com distilbert e termos criticos por dicionario curado no `EntityRuler`, no lugar do Azure Text Analytics |
+
+O detector de termos trata negacao ("no pain" nao vira alerta) e contracao
+("can't breathe" casa como expressao unica). Como o TORGO nao tem vocabulario
+clinico, ele e exercitado pelas frases de `EXEMPLOS_CLINICOS`, no proprio
+modulo.
+
+### Resultados, grupo disartrico contra controle
+
+Comparacao com Mann-Whitney, 40 audios por grupo:
+
+| Metrica | Variacao | p |
+|---|---|---|
+| WER | +837% (0,242 contra 0,026) | <0,0001 |
+| logprob media do Whisper | -49,7% | 0,0022 |
+| proporcao de pausa | +35,3% | 0,0014 |
+| taxa de fala | -21,1% | 0,196 |
+| jitter / shimmer | -22% | 0,004 |
+| HNR | +40,5% | <0,0001 |
+
+Os quatro primeiros vao na direcao esperada e sustentam o requisito de detectar
+alteracao vocal: a fala disartrica quebra o reconhecedor, reduz a confianca dele
+e tem mais pausa.
+
+Jitter, shimmer e HNR aparecem invertidos, e **isso nao e erro de calculo**.
+Essas tres medidas sao validadas em vogal sustentada; sobre frase inteira elas
+acompanham o estilo de fala. Nos proprios dados a taxa de fala se correlaciona
+com o jitter (rho de 0,28 a 0,36) e, invertida, com o HNR (rho de -0,23 a
+-0,41), inclusive dentro de um mesmo grupo. Como o controle fala mais rapido,
+mede pior. Ou o relatorio traz essa ressalva, ou essas tres metricas ficam de
+fora da conclusao. O refinamento possivel e medi-las so em trecho de fonacao
+sustentada.
+
 ## O que falta fazer
 
-### Imediato
-
-1. Extrair o BIDMC e baixar o MIMIC-IV Demo (`./scripts/download_datasets.sh`).
-2. A usuaria precisa preencher `HF_TOKEN` e `HF_USERNAME` no `.env`. Ela ja
-   gerou o token. O `.env` esta no `.gitignore`; o modelo versionado e
-   `.env.example`.
-
-### Fase 2, os tres pipelines (independentes)
-
-**Audio** (`src/audio/`): transcrever os 80 WAVs com faster-whisper
-(`WHISPER_LANGUAGE=en` fixo, porque a deteccao automatica erra em fala
-disartrica), extrair features acusticas com librosa para caracterizar fadiga
-e disartria, aplicar sentimento com transformers e termos criticos com
-`EntityRuler`. Comparar grupo disartrico contra controle. Este e o pipeline
-que vai para a nuvem via Hugging Face.
+### Fase 2, os dois pipelines restantes (independentes)
 
 **Video** (`src/video/`): consumir os JSONs OpenPose do Keraal para angulos
 articulares, rodar YOLOv8 nos MP4 para objetos e areas criticas, comparar
@@ -168,7 +228,7 @@ Space, que e o que se grava no video como integracao com nuvem.
 
 Relatorio tecnico (`reports/`) com fluxo multimodal, modelos por tipo de
 dado, resultados, exemplos de anomalias e **a secao de desvios de escopo**
-cobrindo as cinco decisoes acima. Um desvio documentado e lido como decisao
+cobrindo as seis decisoes acima. Um desvio documentado e lido como decisao
 de engenharia; um desvio silencioso e lido como requisito nao entregue.
 
 Video de ate 15 min no YouTube ou Vimeo demonstrando analise de audio e
