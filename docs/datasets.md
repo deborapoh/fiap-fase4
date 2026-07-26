@@ -132,8 +132,19 @@ anotadores. Vem em CSV, WFDB e MATLAB.
 Extraido em `data/raw/bidmc/bidmc-ppg-and-respiration-dataset-1.0.0/`. Para a
 deteccao de anomalias interessam os 53 arquivos
 `bidmc_csv/bidmc_##_Numerics.csv`, com as colunas `Time [s], HR, PULSE, RESP,
-SpO2`. Os sinais de alta frequencia estao nos `*_Signals.csv` e nos arquivos
-WFDB (`.dat`/`.hea`), que a lib `wfdb` le direto.
+SpO2`, 481 linhas cada. Os sinais de alta frequencia estao nos `*_Signals.csv`
+e nos arquivos WFDB (`.dat`/`.hea`), que a lib `wfdb` le direto. Idade, sexo e
+unidade de internacao de cada paciente estao nos `bidmc_##_Fix.txt`.
+
+Tres armadilhas, todas ja tratadas em `src/anomaly/sinais_vitais.py`:
+
+- **Os nomes das colunas tem espaco a esquerda** (` HR`, ` PULSE`). Sem
+  `skipinitialspace=True` o acesso por nome falha.
+- Ha faltantes, concentrados em `PULSE` e `SpO2`: 413 valores em 102 mil
+  leituras, sempre em trechos curtos de perda do oximetro.
+- **Nao ha rotulo de anomalia.** Nenhum evento vem anotado, o que impede medir
+  acerto diretamente. Por isso a validacao usa anomalia injetada, decisao
+  descrita em [handoff.md](handoff.md).
 
 ## Prescricoes: MIMIC-IV Demo
 
@@ -144,7 +155,20 @@ detectar alteracoes inesperadas no tratamento, alem de `chartevents` e
 
 Extraido em `data/raw/mimic-iv-demo/mimic-iv-clinical-database-demo-2.2/`, com
 as tabelas em `.csv.gz` divididas entre `hosp/` (22 tabelas, inclui
-`prescriptions`) e `icu/` (9 tabelas).
+`prescriptions`) e `icu/` (9 tabelas). O pandas le o `.csv.gz` direto, sem
+descompactar.
+
+A `prescriptions` tem 18.087 ordens de 250 internacoes de 100 pacientes, com
+631 medicamentos distintos. Detalhes que afetam o processamento:
+
+- `dose_val_rx` e texto e as vezes vem como faixa, entao precisa de conversao
+  antes de qualquer conta.
+- **753 ordens tem `stoptime` anterior ao `starttime`**, 4% do total. Nao e
+  erro de leitura: e ordem revista ou cancelada depois de emitida, e o pipeline
+  a trata como evento de baixa severidade.
+- As datas sao deslocadas para o futuro pelo processo de desidentificacao do
+  MIMIC, o que nao atrapalha: todas as regras olham intervalo, nao data
+  absoluta.
 
 ## Citacoes obrigatorias
 

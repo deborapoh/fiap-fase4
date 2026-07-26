@@ -5,27 +5,25 @@ Documento de continuidade do Tech Challenge Fase 4. Leia junto com
 
 ## Ponto de retomada
 
-Ultima sessao: 26/07, fim da tarde. O que foi feito nela:
+Ultima sessao: 26/07, noite. O que foi feito nela:
 
-- Pipeline de audio implementado e rodado ponta a ponta nos 80 audios.
-- Amostra do TORGO refeita porque a anterior invalidava a comparacao entre os
-  grupos (decisao 6 abaixo).
-- BIDMC e MIMIC-IV Demo baixados e extraidos. Nao falta mais nenhum download.
-- `.env` passou a ser lido de verdade, por `src/common/config.py`.
+- Pipeline de anomalias implementado e rodado ponta a ponta nas duas fontes:
+  series de sinais vitais do BIDMC e evolucao de prescricoes do MIMIC-IV Demo.
+- Duas das tres frentes obrigatorias (audio e anomalias) estao fechadas.
 
-Os commits da sessao (amostragem pareada do TORGO, pipeline de audio e esta
-atualizacao) estao apenas locais, **ainda nao enviados** ao remote; o
-`git status` mostra quantos. Rode `git push` quando quiser publicar, atento a
-questao das duas contas GitHub descrita mais abaixo.
+Nao ha pendencia mecanica aberta. Os commits continuam **apenas locais**, ainda
+nao enviados ao remote; o `git status` mostra quantos. Rode `git push` quando
+quiser publicar, atento a questao das duas contas GitHub descrita mais abaixo.
 
-`data/processed/audio_metricas.csv` esta atualizado: 80 linhas, 25 colunas, os
-15 locutores. Ele nao e versionado (`data/` esta no `.gitignore`), entao numa
-maquina nova sera preciso refazer com `python scripts/analisar_audio.py`, cerca
-de 7 minutos.
+Nada em `data/processed/` e versionado (`data/` esta no `.gitignore`), entao
+numa maquina nova e preciso refazer as duas execucoes:
+`python scripts/analisar_audio.py`, cerca de 7 minutos, e
+`python scripts/detectar_anomalias.py`, cerca de 30 segundos.
 
-**Proximo passo sugerido: o pipeline de anomalias** (`src/anomaly/`). Dos dois
-que faltam, e o mais barato: dados ja extraidos, tabulares, sem GPU e sem
-download. O de video exige processar 4,7 GB de MP4 com YOLOv8.
+**Proximo passo: o pipeline de video** (`src/video/`), o unico dos tres
+obrigatorios que falta, e o mais caro: 4,7 GB de MP4 e YOLOv8. Comece pelo
+parser das anotacoes `.anvil`, pelo motivo detalhado na secao do que falta
+fazer.
 
 ## O trabalho
 
@@ -129,6 +127,12 @@ do versionamento.
 "source code string cannot contain null bytes". Depois de criar ou editar
 arquivo pelo agente, rode `python scripts/normalizar_encoding.py`. Com
 `--verificar` ele so aponta, sem alterar, o que serve para hook de commit.
+
+Ha um falso alarme parecido no caminho inverso: a ferramenta de leitura do
+agente exibe como texto ilegivel os arquivos que comecam com aspas triplas,
+mesmo estando em UTF-8 correto. Antes de sair reescrevendo, confirme com `file`
+ou com o proprio `normalizar_encoding.py --verificar`; se acusarem UTF-8, o
+arquivo esta bom e basta ler pelo terminal.
 
 **Bus error no transformers.** O `from_pretrained` deixa os pesos como vistas
 do arquivo `.safetensors` mapeado em memoria, e nesta combinacao de torch com
@@ -242,9 +246,116 @@ mede pior. Ou o relatorio traz essa ressalva, ou essas tres metricas ficam de
 fora da conclusao. O refinamento possivel e medi-las so em trecho de fonacao
 sustentada.
 
+## Pipeline de anomalias: pronto
+
+Roda com `python scripts/detectar_anomalias.py`, cerca de 30 segundos em CPU.
+Aceita `--sem-autoencoder` (so Isolation Forest e regras, uns 10 segundos),
+`--epocas` e `--semente`. Cobre as duas fontes tabulares numa execucao so.
+
+| Modulo | O que faz |
+|---|---|
+| `src/anomaly/sinais_vitais.py` | carga do BIDMC, interpolacao dos faltantes, janelas deslizantes de 30 s com passo de 5 s e estatisticas por janela |
+| `src/anomaly/modelos.py` | Isolation Forest sobre as estatisticas e autoencoder LSTM sobre a sequencia, ambos com limiar por quantil |
+| `src/anomaly/regras.py` | limiares clinicos de alarme, que nomeiam o evento e servem de baseline |
+| `src/anomaly/injecao.py` | cinco tipos de anomalia sintetica, usados para validar |
+| `src/anomaly/validacao.py` | metricas por janela e por evento |
+| `src/anomaly/alertas.py` | junta janelas vizinhas em um alerta com inicio, fim, motivo e gravidade |
+| `src/anomaly/prescricoes.py` | cinco regras sobre a evolucao das prescricoes do MIMIC |
+
+### Decisoes desta frente
+
+Vao na metodologia do relatorio, nao nos desvios de escopo.
+
+1. **Validacao por anomalia injetada.** O BIDMC nao tem rotulo de evento. Os
+   pacientes de teste recebem eventos sinteticos de forma conhecida
+   (dessaturacao, bradicardia, taquicardia, apneia, falha de sensor) e o
+   detector e medido contra eles. Isso mede reacao a desvio plausivel e taxa de
+   alarme; **nao** mede acuracia clinica em evento espontaneo real.
+2. **Divisao por paciente, nao por janela.** Janelas do mesmo paciente sao
+   parecidas; divididas ao acaso, o modelo veria em treino quem vai avaliar.
+3. **Limiar calibrado fora do ajuste.** 23 pacientes ajustam o modelo, outros 8
+   fixam o limiar no quantil 0,99. Calibrado nos proprios dados de ajuste, ele
+   sai apertado e a taxa de alarme estoura em paciente novo.
+4. **Faltantes interpolados ate 5 s** (413 valores em 102 mil leituras); buraco
+   maior descarta a janela, 67 de 4.823. Preencher com media ensinaria o
+   detector a tratar perda de sinal como normal.
+5. **Sinal congelado exige persistencia.** Canal isolado constante nao e
+   evidencia: o SpO2 fica parado por 30 s em 49% das janelas normais. Mesmo
+   olhando os dois canais do mesmo aparelho (oximetro da PULSE e SpO2, ECG da
+   HR e RESP), sao 5%. So vira alerta com 6 janelas seguidas, cerca de 55 s, o
+   que leva os 63 trechos candidatos do BIDMC a 18.
+6. **Escore da internacao pelo pior evento ou pela densidade diaria.** Somar
+   todos os eventos saturava 140 das 211 internacoes em 1,0: internacao longa
+   acumula evento por tempo de exposicao, nao por gravidade.
+
+### Resultados nos sinais vitais
+
+Validacao com 44 eventos injetados em 22 pacientes de teste:
+
+| Detector | AUC | Precisao | Revocacao | Janelas falsas por hora |
+|---|---|---|---|---|
+| Isolation Forest | 0,903 | 1,000 | 0,519 | 0 |
+| autoencoder LSTM | 0,841 | 0,787 | 0,638 | 65 |
+| regras clinicas | 0,764 | 0,643 | 0,682 | 144 |
+
+Combinados em alerta, **42 dos 44 eventos sao detectados** (95%), com atraso
+mediano de 14 s e 2 alertas fora de evento. O atraso conta do inicio do evento
+ate o fechamento da primeira janela que o pega, e o piso e o proprio tamanho
+da janela.
+
+As janelas falsas por hora sao pessimistas de proposito: janela sinalizada
+logo depois de um evento conta como falso positivo ali, mas na saida real e
+absorvida pelo alerta do proprio evento. O custo que a equipe sente sao os 2
+alertas fora de evento em 22 pacientes.
+
+Os tres detectores se complementam, e a tabela por tipo mostra onde cada um e
+cego. O autoencoder pega apneia (0,98) e dessaturacao (0,94) por janela, que
+sao eventos de forma temporal; a floresta vai melhor em taquicardia; e **falha
+de sensor so as regras pegam** (0,62 contra 0,02 e 0,00), porque sinal parado
+e justamente o que reduz a variacao que os dois modelos usam. Por evento, a
+combinacao pega todos os eventos de todos os tipos; so falha de sensor fica
+abaixo, em 78%.
+
+Nas series reais, sem injecao: 27 alertas em 53 pacientes, 425 minutos de
+monitoramento. Tres pacientes chegam a escore 1,0, e valem como exemplo no
+relatorio: o 49 e o 32 tem hipoxemia sustentada pelos 8 minutos inteiros, e o
+13 combina bradipneia com sinal congelado.
+
+### Resultados nas prescricoes
+
+18.087 ordens de 250 internacoes, 1.714 eventos sinalizados. Por tipo:
+
+| Regra | Eventos | O que e |
+|---|---|---|
+| `inconsistencia_temporal` | 753 | termino anterior ao inicio, ordem revista ou cancelada |
+| `salto_de_dose` | 565 | mudanca de 5x ou mais entre ordens consecutivas em ate 48 h |
+| `dose_atipica` | 280 | z robusto >= 5 contra a distribuicao da coorte |
+| `escalonamento_de_via` | 97 | oral para parenteral no mesmo medicamento em ate 24 h |
+| `rajada_de_prescricoes` | 19 | medicamentos novos em 6 h acima do percentil 99 |
+
+686 dos 1.714 caem em medicamento de alto risco da lista do ISMP, o que agrava
+a severidade. Exemplos bons para o relatorio: midazolam de 100 mg para 0,5 mg
+em 8 h, insulina 75 unidades contra mediana de 5 na coorte, cloreto de potassio
+de oral para intravenoso em 6 h.
+
+### O que sai em `data/processed/`
+
+| Arquivo | Conteudo |
+|---|---|
+| `anomalias_vitais.csv` | um alerta por linha: paciente, inicio, fim, tipo, severidade, escore, detectores |
+| `anomalias_vitais_resumo.csv` | um paciente por linha, com `escore_risco` para a fusao |
+| `anomalias_validacao.csv` | evento injetado a evento injetado, com o que foi detectado |
+| `anomalias_prescricoes.csv` | um evento por linha, com o detalhe legivel do que mudou |
+| `anomalias_prescricoes_resumo.csv` | uma internacao por linha, com `escore_risco` para a fusao |
+
+Os dois `_resumo` sao a interface com a fusao multimodal. Trazem
+`escore_risco` de 0 a 1 na mesma escala do `escore_criticidade` do audio, o que
+foi proposital: os pesos de severidade e a saturacao vem de `regras.py` e sao
+os mesmos de `analise_texto.py`.
+
 ## O que falta fazer
 
-### Fase 2, os dois pipelines restantes (independentes)
+### Fase 2, o pipeline de video
 
 **Video** (`src/video/`): consumir os JSONs OpenPose do Keraal para angulos
 articulares, rodar YOLOv8 nos MP4 para objetos e areas criticas, comparar
@@ -258,33 +369,24 @@ arquivos por gravacao, um medico em cada. Onde os dois discordam, ou se usa
 apenas o consenso, ou se registra a discordancia como incerteza; e uma escolha
 que precisa aparecer no relatorio.
 
-**Anomalias** (`src/anomaly/`): Isolation Forest como baseline e autoencoder
-LSTM nas series de HR/RR/SpO2 do BIDMC (1 Hz, use a lib `wfdb` ou os CSVs
-`bidmc_##_Numerics.csv`). Alteracoes inesperadas na tabela `prescriptions` do
-MIMIC demo.
-
-Detalhes ja levantados dos dados, para nao perder tempo:
-
-- Cada `bidmc_##_Numerics.csv` tem 481 linhas, ou seja 8 minutos a 1 Hz, e sao
-  53 pacientes. Da uma matriz pequena: cabe inteira em memoria.
-- **Os nomes das colunas tem espaco a esquerda**: `Time [s]`, ` HR`, ` PULSE`,
-  ` RESP`, ` SpO2`. Leia com `skipinitialspace=True` ou renomeie, senao
-  `df.HR` falha.
-- Ha faltantes, concentrados em `PULSE` e `SpO2` (13 de 481 no paciente 01).
-  Decida entre interpolar ou mascarar antes de treinar, e registre a escolha.
-- O BIDMC **nao tem rotulo de anomalia**. A validacao tera que ser por
-  inspecao dos eventos detectados contra o sinal, ou por anomalia injetada
-  artificialmente. Vale decidir isso antes de escrever o modelo, porque muda o
-  que o pipeline precisa devolver.
-- No MIMIC as tabelas sao `.csv.gz` em
-  `data/raw/mimic-iv-demo/mimic-iv-clinical-database-demo-2.2/hosp/`. O pandas
-  le direto, sem descompactar.
+Falta tambem o terceiro item do bullet de anomalias do enunciado, "padroes de
+movimentacao do paciente durante a internacao", que depende do video: os dois
+primeiros (sinais vitais e prescricoes) ja estao entregues.
 
 ### Fase 3
 
 Fusao (`src/fusion/`) consolidando os tres sinais em score de risco por
-paciente, com regra de alerta. App Streamlit publicado num Hugging Face
-Space, que e o que se grava no video como integracao com nuvem.
+paciente, com regra de alerta. Duas das tres entradas ja existem no formato
+certo: `audio_metricas.csv` traz `escore_criticidade` e os dois
+`anomalias_*_resumo.csv` trazem `escore_risco`, todos de 0 a 1 e com a mesma
+escala de severidade. Falta decidir como as tres frentes se ligam, ja que cada
+uma tem uma chave diferente de paciente (locutor do TORGO, paciente do BIDMC,
+internacao do MIMIC) e nenhuma delas se refere a mesma pessoa. A saida honesta
+e montar um paciente sintetico que combine as tres fontes, e dizer isso no
+relatorio.
+
+App Streamlit publicado num Hugging Face Space, que e o que se grava no video
+como integracao com nuvem.
 
 ### Fase 4
 
