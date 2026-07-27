@@ -32,8 +32,8 @@ Checklist do que é **obrigatório** neste trabalho.
 
 - Processar áudios de consultas médicas
 - Detectar alterações vocais indicativas de condições médicas (ex.: cansaço, dificuldades respiratórias)
-- Utilizar Azure Speech to Text para transcrever e analisar os áudios
-- Identificar termos críticos e sentimentos com Azure Text Analytics
+- Transcrever com faster-whisper (Whisper)
+- Identificar termos críticos (spaCy EntityRuler) e sentimento (distilbert)
 
 ### 3. Detecção de Anomalias
 
@@ -59,5 +59,5 @@ Checklist do que é **obrigatório** neste trabalho.
 - Demonstração do processamento multimodal:
   - Exemplo prático da análise de áudio e vídeo
   - Detecção e resposta a anomalias
-  - Integração dos serviços Azure
+  - Integração com Hugging Face Spaces
   - Fluxo final do alerta à equipe médica

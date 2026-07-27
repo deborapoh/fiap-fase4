@@ -1,10 +1,9 @@
 """Analise das transcricoes: sentimento e termos criticos.
 
-Substitui o Azure Text Analytics previsto no enunciado. Sao duas tarefas
-distintas:
+Sao duas tarefas distintas:
 
-sentimento       modelo de classificacao do transformers. Serve de proxy para
-                 desconforto ou angustia na fala do paciente.
+sentimento       modelo de classificacao do transformers (distilbert). Serve de
+                 proxy para desconforto ou angustia na fala do paciente.
 termos criticos  dicionario clinico curado, casado com o `EntityRuler` do
                  spaCy. Um modelo estatistico de NER erraria aqui, porque as
                  expressoes que importam sao fechadas e conhecidas de antemao;

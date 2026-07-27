@@ -9,4 +9,4 @@ license: mit
 ---
 
 Dashboard estático do Tech Challenge FIAP Fase 4.
-Serviço gerenciado em nuvem (Hugging Face Spaces), no lugar do Azure.
+Serviço gerenciado em nuvem via Hugging Face Spaces.

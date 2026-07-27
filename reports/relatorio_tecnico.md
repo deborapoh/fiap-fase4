@@ -59,7 +59,7 @@ grave (Incorrect > Incomplete > Motionless > Correct).
 
 | Peça | Papel |
 |---|---|
-| faster-whisper large-v3 | Transcrição (substitui Azure Speech to Text) |
+| faster-whisper large-v3 | Transcrição de áudio |
 | Praat / parselmouth | jitter, shimmer, HNR, f0, pausa, taxa de fala |
 | distilbert SST-2 | Sentimento (proxy de desconforto) |
 | spaCy EntityRuler | Termos críticos por dicionário curado |
@@ -132,13 +132,11 @@ Ver seção 3.4.
 
 ## 5. Camada de nuvem
 
-O enunciado cita Azure Speech to Text e Azure Text Analytics. A solução usa:
+A solução usa Hugging Face como serviço gerenciado em nuvem:
 
-1. **Modelos Hugging Face** locais (Whisper, distilbert) no lugar dos dois
-   serviços Azure de NLP/speech.
-2. **Hugging Face Space** com dashboard da fila de alertas e da fusão —
-   serviço gerenciado em nuvem, alinhado ao Objetivo do enunciado
-   (“serviços gerenciados em nuvem, **como** Azure”).
+1. **Modelos Hugging Face** locais — Whisper (faster-whisper) para transcrição
+   e distilbert para sentimento.
+2. **Hugging Face Space** — dashboard da fila de alertas e da fusão.
 
 URL: https://huggingface.co/spaces/deborapoh/fiap-fase4-monitoramento
 
@@ -152,8 +150,8 @@ gravada. Ambos consomem os mesmos resultados.
 
 Decisões de engenharia, não omissão silenciosa:
 
-1. **Azure → Hugging Face** — barreira de cartão de crédito; Space fecha o
-   requisito de serviço gerenciado.
+1. **Nuvem via Hugging Face** — Spaces para a demo pública; Whisper e
+   distilbert para áudio e sentimento.
 2. **KIMORE → Keraal** — KIMORE indisponível (403/404); Keraal traz vídeo RGB,
    OpenPose pronto e anotação médica temporal.
 3. **OpenPose não compilado** — JSONs do Keraal atendem o requisito; pose nova

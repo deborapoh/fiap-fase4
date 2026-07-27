@@ -1,9 +1,8 @@
 """Demo do sistema de monitoramento hospitalar multimodal.
 
-Publicado num Hugging Face Space (serviço gerenciado em nuvem), no lugar dos
-serviços Azure previstos no enunciado. Consome os CSVs em data/processed/
-gerados pelos pipelines locais — a demo mostra fusão, alertas e as três
-frentes, sem reprocessar áudio/vídeo na hora.
+Demo Streamlit que consome os CSVs em data/processed/ gerados pelos pipelines
+locais — mostra fusão, alertas e as três frentes, sem reprocessar áudio/vídeo
+na hora. A publicação em nuvem usa Hugging Face Spaces.
 """
 
 from __future__ import annotations
@@ -170,8 +169,8 @@ def main() -> None:
    (áudio 0,20 · vitais 0,30 · vídeo 0,30 · prescrições 0,20).
 4. **Alerta à equipe** — severidade alta se o risco fundido >= 0,75 ou se
    duas ou mais frentes disparam; a fila desta demo é o que a equipe vê.
-5. **Nuvem** — este app roda num Hugging Face Space (serviço gerenciado),
-   no lugar do Azure previsto no enunciado.
+5. **Nuvem** — Hugging Face Spaces hospeda o dashboard de alertas
+   (serviço gerenciado em nuvem).
             """
         )
         paciente = st.selectbox(

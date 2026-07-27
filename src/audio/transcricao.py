@@ -1,8 +1,7 @@
 """Transcricao de audio com faster-whisper.
 
-Substitui o Azure Speech to Text previsto no enunciado. O faster-whisper e uma
-reimplementacao do Whisper sobre o CTranslate2, com a mesma acuracia do modelo
-original e ate 4x mais rapido.
+O faster-whisper e uma reimplementacao do Whisper sobre o CTranslate2, com a
+mesma acuracia do modelo original e ate 4x mais rapido.
 
 Alem do texto, guardamos a probabilidade media de log dos segmentos. Ela cai
 quando o modelo tem dificuldade de reconhecer a fala, o que por si so ja e um
