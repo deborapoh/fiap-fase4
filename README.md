@@ -55,7 +55,7 @@ Checklist do que é **obrigatório** neste trabalho.
 
 ### Vídeo (até 15 minutos)
 
-- Upload no YouTube ou Vimeo (público ou não listado)
+- Vídeo: https://youtu.be/Y8E0EXLdXWU
 - Demonstração do processamento multimodal:
   - Exemplo prático da análise de áudio e vídeo
   - Detecção e resposta a anomalias
