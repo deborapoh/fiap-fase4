@@ -46,8 +46,8 @@ Todas precisam constar da secao de desvios de escopo do relatorio tecnico.
 ### 1. Azure foi substituido por Hugging Face
 
 O enunciado exige, nominalmente, Azure Speech to Text e Azure Text Analytics.
-A usuaria decidiu nao usar Azure. Isso significa que dois bullets obrigatorios
-nao serao cumpridos ao pe da letra.
+A decisao do projeto foi nao usar Azure. Isso significa que dois bullets
+obrigatorios nao serao cumpridos ao pe da letra.
 
 A brecha usada: a secao Objetivo do enunciado pede "servicos gerenciados em
 nuvem, **como** Azure Cognitive Services", onde o Azure e exemplo. Mantendo
@@ -123,16 +123,10 @@ do versionamento.
 
 ### Duas armadilhas do ambiente
 
-**Encoding.** O editor grava arquivos novos em UTF-16, que o Python rejeita com
-"source code string cannot contain null bytes". Depois de criar ou editar
-arquivo pelo agente, rode `python scripts/normalizar_encoding.py`. Com
-`--verificar` ele so aponta, sem alterar, o que serve para hook de commit.
-
-Ha um falso alarme parecido no caminho inverso: a ferramenta de leitura do
-agente exibe como texto ilegivel os arquivos que comecam com aspas triplas,
-mesmo estando em UTF-8 correto. Antes de sair reescrevendo, confirme com `file`
-ou com o proprio `normalizar_encoding.py --verificar`; se acusarem UTF-8, o
-arquivo esta bom e basta ler pelo terminal.
+**Encoding.** Alguns editores gravam arquivos novos em UTF-16, que o Python
+rejeita com "source code string cannot contain null bytes". Depois de criar
+ou editar arquivos de texto, rode `python scripts/normalizar_encoding.py`.
+Com `--verificar` ele so aponta, sem alterar, o que serve para hook de commit.
 
 **Bus error no transformers.** O `from_pretrained` deixa os pesos como vistas
 do arquivo `.safetensors` mapeado em memoria, e nesta combinacao de torch com
@@ -403,10 +397,10 @@ Subir no YouTube ou Vimeo (publico ou nao listado).
 ## Pendencia com o grupo
 
 O trabalho e em grupo e vale 90% da nota de todas as disciplinas da fase.
-A remocao do Azure custa dois bullets obrigatorios e nao e decisao de uma
-pessoa so. A usuaria foi orientada a alinhar isso com o grupo. Se alguem
-conseguir criar conta no Azure, reconsiderar e o caminho mais seguro para a
-nota: o tier F0 e gratuito permanente e trava em vez de cobrar.
+A remocao do Azure custa dois bullets obrigatorios e precisa estar alinhada
+com o grupo. Se alguem conseguir criar conta no Azure, reconsiderar e o
+caminho mais seguro para a nota: o tier F0 e gratuito permanente e trava em
+vez de cobrar.
 
 ## Convencoes
 
@@ -414,5 +408,5 @@ Texto legível (UI, relatório, README) em português **com acentuação**.
 Identificadores de código e nomes de arquivo continuam sem acento
 (`prescricoes.py`, `escore_risco`), para evitar dor com encoding e imports.
 Mensagens de commit em português. Sem emojis no código. Nada de dados ou
-credenciais no versionamento. Depois de editar pelo agente, rode
+credenciais no versionamento. Depois de editar arquivos de texto, rode
 `python scripts/normalizar_encoding.py` (o editor às vezes grava UTF-16).
