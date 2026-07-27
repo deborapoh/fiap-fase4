@@ -1,5 +1,12 @@
 # Tech Challenge — Fase 4
 
+Sistema de monitoramento hospitalar multimodal (audio · video · vitais · prescricoes).
+
+- Relatorio: [`reports/relatorio_tecnico.md`](reports/relatorio_tecnico.md)
+- Handoff / como rodar: [`docs/handoff.md`](docs/handoff.md)
+- Demo em nuvem: https://huggingface.co/spaces/deborapoh/fiap-fase4-monitoramento
+- Demo local: `streamlit run app/streamlit_app.py`
+
 Checklist do que é **obrigatório** neste trabalho.
 
 ## Entregas técnicas

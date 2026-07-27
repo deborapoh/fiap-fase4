@@ -5,25 +5,25 @@ Documento de continuidade do Tech Challenge Fase 4. Leia junto com
 
 ## Ponto de retomada
 
-Ultima sessao: 26/07, noite. O que foi feito nela:
+Ultima sessao: 26/07, noite (sessao de fechamento). O que foi feito nela:
 
-- Pipeline de anomalias implementado e rodado ponta a ponta nas duas fontes:
-  series de sinais vitais do BIDMC e evolucao de prescricoes do MIMIC-IV Demo.
-- Duas das tres frentes obrigatorias (audio e anomalias) estao fechadas.
+- Pipeline de **video** implementado e rodado (OpenPose + YOLOv8 + Anvil):
+  AUC 0,832 / F1 0,786 na validacao cruzada contra consenso dos medicos.
+- **Fusao multimodal** com paciente sintetico (`scripts/fundir_risco.py`).
+- App Streamlit local + Space HF estatico publicado:
+  https://huggingface.co/spaces/deborapoh/fiap-fase4-monitoramento
+- Relatorio tecnico em `reports/relatorio_tecnico.md`.
 
-Nao ha pendencia mecanica aberta. Os commits continuam **apenas locais**, ainda
-nao enviados ao remote; o `git status` mostra quantos. Rode `git push` quando
-quiser publicar, atento a questao das duas contas GitHub descrita mais abaixo.
+As tres frentes obrigatorias + fusao + nuvem + relatorio estao fechadas.
 
-Nada em `data/processed/` e versionado (`data/` esta no `.gitignore`), entao
-numa maquina nova e preciso refazer as duas execucoes:
-`python scripts/analisar_audio.py`, cerca de 7 minutos, e
-`python scripts/detectar_anomalias.py`, cerca de 30 segundos.
+**Unico entregavel pendente do autor:** gravar o video de apresentacao
+(ate 15 min) e subir no YouTube/Vimeo. Roteiro sugerido no fim deste arquivo.
 
-**Proximo passo: o pipeline de video** (`src/video/`), o unico dos tres
-obrigatorios que falta, e o mais caro: 4,7 GB de MP4 e YOLOv8. Comece pelo
-parser das anotacoes `.anvil`, pelo motivo detalhado na secao do que falta
-fazer.
+Para regenerar CSVs numa maquina nova:
+`python scripts/analisar_audio.py` (~7 min),
+`python scripts/detectar_anomalias.py` (~30 s),
+`python scripts/analisar_video.py` (~2 min com YOLO),
+`python scripts/fundir_risco.py`.
 
 ## O trabalho
 
@@ -353,51 +353,52 @@ Os dois `_resumo` sao a interface com a fusao multimodal. Trazem
 foi proposital: os pesos de severidade e a saturacao vem de `regras.py` e sao
 os mesmos de `analise_texto.py`.
 
-## O que falta fazer
+## Pipeline de video: pronto
 
-### Fase 2, o pipeline de video
+Roda com `python scripts/analisar_video.py` (~2 min com YOLO; `--sem-yolo`
+para so esqueleto). Discordancia A/B → rotulo mais grave; classificador
+logistico no consenso G1A (CV 5-fold: AUC 0,832, F1 0,786).
 
-**Video** (`src/video/`): consumir os JSONs OpenPose do Keraal para angulos
-articulares, rodar YOLOv8 nos MP4 para objetos e areas criticas, comparar
-execucao de paciente contra saudavel e gerar relatorio automatico de desvios.
-Validar contra as anotacoes dos medicos (que dao o rotulo verdadeiro, o erro
-e a janela temporal).
+| Modulo | O que faz |
+|---|---|
+| `src/video/anotacoes.py` | parser Anvil UTF-16, consenso / mais grave |
+| `src/video/esqueleto.py` | angulos a partir dos JSONs OpenPose |
+| `src/video/desvios.py` | perfil G2A + classificador + relatorio |
+| `src/video/objetos.py` | YOLOv8n em 5 frames/video |
 
-Comece pelo parser das anotacoes `.anvil`, nao pelo modelo: e ele que define o
-alvo. Sao **XML em UTF-16** (`open(..., encoding='utf-16')`), um par de
-arquivos por gravacao, um medico em cada. Onde os dois discordam, ou se usa
-apenas o consenso, ou se registra a discordancia como incerteza; e uma escolha
-que precisa aparecer no relatorio.
+Saida: `video_desvios.csv`, `video_desvios_resumo.csv` (`escore_risco` para fusao),
+`video_validacao.csv`, `video_objetos.csv`.
 
-Falta tambem o terceiro item do bullet de anomalias do enunciado, "padroes de
-movimentacao do paciente durante a internacao", que depende do video: os dois
-primeiros (sinais vitais e prescricoes) ja estao entregues.
+## Fusao e nuvem: prontos
 
-### Fase 3
+- `src/fusion/risco.py` + `scripts/fundir_risco.py` → `fusao_risco.csv` /
+  `fusao_alertas.csv` (paciente sintetico declarado).
+- Streamlit local: `streamlit run app/streamlit_app.py`.
+- Space HF (static, gratuito): 
+  https://huggingface.co/spaces/deborapoh/fiap-fase4-monitoramento
+  (Streamlit/Docker na CPU gratuita passaram a exigir PRO; por isso o Space
+  publico e o dashboard estatico. O app Streamlit fica no repo para a gravacao.)
 
-Fusao (`src/fusion/`) consolidando os tres sinais em score de risco por
-paciente, com regra de alerta. Duas das tres entradas ja existem no formato
-certo: `audio_metricas.csv` traz `escore_criticidade` e os dois
-`anomalias_*_resumo.csv` trazem `escore_risco`, todos de 0 a 1 e com a mesma
-escala de severidade. Falta decidir como as tres frentes se ligam, ja que cada
-uma tem uma chave diferente de paciente (locutor do TORGO, paciente do BIDMC,
-internacao do MIMIC) e nenhuma delas se refere a mesma pessoa. A saida honesta
-e montar um paciente sintetico que combine as tres fontes, e dizer isso no
-relatorio.
+## Relatorio tecnico: pronto
 
-App Streamlit publicado num Hugging Face Space, que e o que se grava no video
-como integracao com nuvem.
+`reports/relatorio_tecnico.md` — fluxo, modelos, resultados, desvios de escopo.
 
-### Fase 4
+## O que falta (so o autor)
 
-Relatorio tecnico (`reports/`) com fluxo multimodal, modelos por tipo de
-dado, resultados, exemplos de anomalias e **a secao de desvios de escopo**
-cobrindo as seis decisoes acima. Um desvio documentado e lido como decisao
-de engenharia; um desvio silencioso e lido como requisito nao entregue.
+### Video de apresentacao (ate 15 min)
 
-Video de ate 15 min no YouTube ou Vimeo demonstrando analise de audio e
-video, deteccao e resposta a anomalias, integracao com o servico em nuvem e o
-fluxo do alerta.
+Roteiro sugerido:
+
+1. Problema e arquitetura (1–2 min) — slide ou desenho do fluxo multimodal.
+2. Audio (2–3 min) — CSV / comparacao dysarthria vs healthy; mencionar Whisper
+   no lugar do Azure Speech.
+3. Video (3 min) — desvio postural vs anotacao medica; YOLO na cena.
+4. Anomalias (3 min) — alerta BIDMC + exemplo de prescricoes MIMIC.
+5. Fusao + fila de alertas (2 min) — Streamlit local e/ou Space HF.
+6. Desvios de escopo (1–2 min) — Azure→HF, KIMORE→Keraal, paciente sintetico.
+7. Encerrar com link do repo e do Space.
+
+Subir no YouTube ou Vimeo (publico ou nao listado).
 
 ## Pendencia com o grupo
 
