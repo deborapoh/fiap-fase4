@@ -410,6 +410,9 @@ nota: o tier F0 e gratuito permanente e trava em vez de cobrar.
 
 ## Convencoes
 
-Codigo, comentarios e documentacao em portugues, sem acentos em nomes de
-arquivo e sem emojis. Mensagens de commit em portugues, explicando o porque
-da mudanca. Nada de dados ou credenciais no versionamento.
+Texto legível (UI, relatório, README) em português **com acentuação**.
+Identificadores de código e nomes de arquivo continuam sem acento
+(`prescricoes.py`, `escore_risco`), para evitar dor com encoding e imports.
+Mensagens de commit em português. Sem emojis no código. Nada de dados ou
+credenciais no versionamento. Depois de editar pelo agente, rode
+`python scripts/normalizar_encoding.py` (o editor às vezes grava UTF-16).

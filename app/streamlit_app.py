@@ -1,9 +1,9 @@
 """Demo do sistema de monitoramento hospitalar multimodal.
 
-Publicado num Hugging Face Space (servico gerenciado em nuvem), no lugar dos
-servicos Azure previstos no enunciado. Consome os CSVs em data/processed/
-gerados pelos pipelines locais — a demo mostra fusao, alertas e as tres
-frentes, sem reprocessar audio/video na hora.
+Publicado num Hugging Face Space (serviço gerenciado em nuvem), no lugar dos
+serviços Azure previstos no enunciado. Consome os CSVs em data/processed/
+gerados pelos pipelines locais — a demo mostra fusão, alertas e as três
+frentes, sem reprocessar áudio/vídeo na hora.
 """
 
 from __future__ import annotations
@@ -14,8 +14,8 @@ import pandas as pd
 import streamlit as st
 
 _AQUI = Path(__file__).resolve().parent
-# No Space o app e a raiz; no repo o arquivo fica em app/ e os CSVs em
-# data/processed/ na raiz OU em app/data/processed/ (copia para o Space).
+# No Space o app é a raiz; no repo o arquivo fica em app/ e os CSVs em
+# data/processed/ na raiz OU em app/data/processed/ (cópia para o Space).
 _CANDIDATOS = (
     _AQUI / "data" / "processed",
     _AQUI.parent / "data" / "processed",
@@ -40,9 +40,9 @@ def carregar(nome: str) -> pd.DataFrame:
 def main() -> None:
     st.title("Monitoramento hospitalar multimodal")
     st.caption(
-        "Tech Challenge FIAP — Fase 4. Fusao de audio (TORGO), video (Keraal), "
-        "sinais vitais (BIDMC) e prescricoes (MIMIC-IV Demo). Pacientes sao "
-        "sinteticos: as bases publicas nao compartilham a mesma pessoa."
+        "Tech Challenge FIAP — Fase 4. Fusão de áudio (TORGO), vídeo (Keraal), "
+        "sinais vitais (BIDMC) e prescrições (MIMIC-IV Demo). Pacientes são "
+        "sintéticos: as bases públicas não compartilham a mesma pessoa."
     )
 
     fusao = carregar("fusao_risco.csv")
@@ -56,23 +56,23 @@ def main() -> None:
 
     if fusao.empty:
         st.warning(
-            "CSVs de fusao nao encontrados. Rode os pipelines e "
+            "CSVs de fusão não encontrados. Rode os pipelines e "
             "`python scripts/fundir_risco.py` antes de abrir a demo."
         )
         return
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Pacientes sinteticos", len(fusao))
+    c1.metric("Pacientes sintéticos", len(fusao))
     c2.metric("Alertas ativos", int(fusao["alerta"].sum()))
-    c3.metric("Escore medio", f"{fusao['escore_risco'].mean():.2f}")
+    c3.metric("Escore médio", f"{fusao['escore_risco'].mean():.2f}")
     c4.metric("Severidade alta", int((fusao["severidade"] == "alta").sum()))
 
     aba_alerta, aba_fusao, aba_frentes, aba_fluxo = st.tabs(
-        ["Fila de alertas", "Fusao multimodal", "Frentes", "Fluxo do alerta"]
+        ["Fila de alertas", "Fusão multimodal", "Frentes", "Fluxo do alerta"]
     )
 
     with aba_alerta:
-        st.subheader("Fila para a equipe medica")
+        st.subheader("Fila para a equipe médica")
         fila = alertas if not alertas.empty else fusao[fusao["alerta"]]
         if fila.empty:
             st.info("Nenhum alerta no momento.")
@@ -103,7 +103,7 @@ def main() -> None:
     with aba_frentes:
         c_a, c_v = st.columns(2)
         with c_a:
-            st.markdown("#### Audio (TORGO)")
+            st.markdown("#### Áudio (TORGO)")
             if audio.empty:
                 st.caption("sem dados")
             else:
@@ -115,7 +115,7 @@ def main() -> None:
                 ).round(3)
                 st.dataframe(resumo, use_container_width=True)
         with c_v:
-            st.markdown("#### Video (Keraal)")
+            st.markdown("#### Vídeo (Keraal)")
             if video.empty:
                 st.caption("sem dados")
             else:
@@ -143,7 +143,7 @@ def main() -> None:
                     st.dataframe(vitais_evt.head(20), use_container_width=True,
                                  hide_index=True)
         with c_p:
-            st.markdown("#### Prescricoes (MIMIC)")
+            st.markdown("#### Prescrições (MIMIC)")
             if presc.empty:
                 st.caption("sem dados")
             else:
@@ -163,14 +163,14 @@ def main() -> None:
         st.subheader("Fluxo do alerta")
         st.markdown(
             """
-1. **Coleta** — audio (Whisper + metricas vocais), video (OpenPose + YOLOv8),
-   sinais vitais (BIDMC) e prescricoes (MIMIC).
-2. **Deteccao** — cada frente gera um escore em \\[0, 1\\] e alertas locais.
-3. **Fusao** — paciente sintetico combina as quatro entradas com pesos
-   (audio 0,20 · vitais 0,30 · video 0,30 · prescricoes 0,20).
-4. **Alerta a equipe** — severidade alta se o risco fundido >= 0,75 ou se
-   duas ou mais frentes disparam; a fila desta demo e o que a equipe ve.
-5. **Nuvem** — este app roda num Hugging Face Space (servico gerenciado),
+1. **Coleta** — áudio (Whisper + métricas vocais), vídeo (OpenPose + YOLOv8),
+   sinais vitais (BIDMC) e prescrições (MIMIC).
+2. **Detecção** — cada frente gera um escore em \\[0, 1\\] e alertas locais.
+3. **Fusão** — paciente sintético combina as quatro entradas com pesos
+   (áudio 0,20 · vitais 0,30 · vídeo 0,30 · prescrições 0,20).
+4. **Alerta à equipe** — severidade alta se o risco fundido >= 0,75 ou se
+   duas ou mais frentes disparam; a fila desta demo é o que a equipe vê.
+5. **Nuvem** — este app roda num Hugging Face Space (serviço gerenciado),
    no lugar do Azure previsto no enunciado.
             """
         )
@@ -182,7 +182,7 @@ def main() -> None:
         st.write(
             f"**Risco fundido:** {row['escore_risco']:.2f} · "
             f"**Severidade:** {row['severidade']} · "
-            f"**Alerta:** {'SIM' if row['alerta'] else 'nao'}"
+            f"**Alerta:** {'SIM' if row['alerta'] else 'não'}"
         )
         st.progress(min(1.0, float(row["escore_risco"])))
         st.json({

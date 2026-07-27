@@ -10,9 +10,9 @@ license: mit
 
 # Monitoramento hospitalar multimodal — FIAP Fase 4
 
-Demo do Tech Challenge: fusao de audio, video, sinais vitais e prescricoes
-em um escore de risco e fila de alertas para a equipe medica.
+Demo do Tech Challenge: fusão de áudio, vídeo, sinais vitais e prescrições
+em um escore de risco e fila de alertas para a equipe médica.
 
-Os CSVs em `data/processed/` sao resultados pre-computados dos pipelines
-locais. Esta Space e a camada de servico gerenciado em nuvem (Hugging Face),
+Os CSVs em `data/processed/` são resultados pré-computados dos pipelines
+locais. Este Space é a camada de serviço gerenciado em nuvem (Hugging Face),
 no lugar do Azure previsto no enunciado.

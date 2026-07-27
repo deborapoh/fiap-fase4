@@ -1,6 +1,6 @@
 # Tech Challenge — Fase 4
 
-Sistema de monitoramento hospitalar multimodal (audio · video · vitais · prescricoes).
+Sistema de monitoramento hospitalar multimodal (áudio · vídeo · vitais · prescrições).
 
 - Relatorio: [`reports/relatorio_tecnico.md`](reports/relatorio_tecnico.md)
 - Handoff / como rodar: [`docs/handoff.md`](docs/handoff.md)

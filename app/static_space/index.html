@@ -40,29 +40,29 @@
 <body>
 <header>
   <h1>Monitoramento hospitalar multimodal</h1>
-  <p class="cap">Tech Challenge FIAP — Fase 4. Fusao de audio (TORGO), video (Keraal),
-  sinais vitais (BIDMC) e prescricoes (MIMIC). Pacientes sao <strong>sinteticos</strong>:
-  as bases publicas nao falam da mesma pessoa. Space estatico no Hugging Face
-  (servico gerenciado em nuvem), no lugar do Azure do enunciado.</p>
+  <p class="cap">Tech Challenge FIAP — Fase 4. Fusão de áudio (TORGO), vídeo (Keraal),
+  sinais vitais (BIDMC) e prescrições (MIMIC). Pacientes são <strong>sintéticos</strong>:
+  as bases públicas não falam da mesma pessoa. Space estático no Hugging Face
+  (serviço gerenciado em nuvem), no lugar do Azure do enunciado.</p>
 </header>
 <main>
   <div class="metrics">
-    <div class="metric"><b>20</b><span>pacientes sinteticos</span></div>
+    <div class="metric"><b>20</b><span>pacientes sintéticos</span></div>
     <div class="metric"><b>15</b><span>alertas ativos</span></div>
-    <div class="metric"><b>0.34</b><span>escore medio</span></div>
+    <div class="metric"><b>0.34</b><span>escore médio</span></div>
     <div class="metric"><b>7</b><span>severidade alta</span></div>
   </div>
 
   <section>
-    <h2>Fila de alertas para a equipe medica</h2>
+    <h2>Fila de alertas para a equipe médica</h2>
     <table><thead><tr><th>id_sintetico</th><th>escore_risco</th><th>severidade</th><th>escore_audio</th><th>escore_vitais</th><th>escore_video</th><th>escore_prescricoes</th><th>motivos</th></tr></thead><tbody><tr><td>SYN-020</td><td>0.6728</td><td>alta</td><td>0.4</td><td>0.6667</td><td>0.8094</td><td>0.75</td><td>vitais:0.67 (n_alertas=1) | video:0.81 (ELK eval=Incorrect) | prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-017</td><td>0.5524</td><td>alta</td><td>0.0</td><td>0.5174</td><td>0.824</td><td>0.75</td><td>video:0.82 (ELK eval=Correct) | prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-010</td><td>0.5494</td><td>alta</td><td>0.0</td><td>0.6667</td><td>0.5097</td><td>0.9826</td><td>vitais:0.67 (n_alertas=2) | video:0.51 (CTK eval=Incorrect) | prescricoes:0.98 (prescricoes)</td></tr><tr><td>SYN-004</td><td>0.4244</td><td>media</td><td>0.46</td><td>0.5086</td><td>0.0995</td><td>0.75</td><td>prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-005</td><td>0.4172</td><td>alta</td><td>0.06</td><td>0.0</td><td>0.8506</td><td>0.75</td><td>video:0.85 (ELK eval=Incorrect) | prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-013</td><td>0.389</td><td>alta</td><td>0.36</td><td>0.0</td><td>0.5567</td><td>0.75</td><td>video:0.56 (RTK eval=Correct) | prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-015</td><td>0.3741</td><td>alta</td><td>0.06</td><td>0.0</td><td>0.7071</td><td>0.75</td><td>video:0.71 (ELK eval=Incorrect) | prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-009</td><td>0.353</td><td>alta</td><td>0.0</td><td>0.0</td><td>0.51</td><td>1.0</td><td>video:0.51 (ELK eval=Incorrect) | prescricoes:1.00 (prescricoes)</td></tr><tr><td>SYN-006</td><td>0.2851</td><td>media</td><td>0.1</td><td>0.0</td><td>0.2169</td><td>1.0</td><td>prescricoes:1.00 (prescricoes)</td></tr><tr><td>SYN-007</td><td>0.2771</td><td>media</td><td>0.0</td><td>0.0</td><td>0.4237</td><td>0.75</td><td>prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-012</td><td>0.2691</td><td>media</td><td>0.06</td><td>0.0</td><td>0.1904</td><td>1.0</td><td>prescricoes:1.00 (prescricoes)</td></tr><tr><td>SYN-014</td><td>0.2578</td><td>media</td><td>0.06</td><td>0.0</td><td>0.3193</td><td>0.75</td><td>prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-019</td><td>0.2389</td><td>media</td><td>0.1</td><td>0.0</td><td>0.2297</td><td>0.75</td><td>prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-002</td><td>0.2291</td><td>media</td><td>0.06</td><td>0.0</td><td>0.2238</td><td>0.75</td><td>prescricoes:0.75 (prescricoes)</td></tr><tr><td>SYN-011</td><td>0.1894</td><td>media</td><td>0.06</td><td>0.0</td><td>0.0914</td><td>0.75</td><td>prescricoes:0.75 (prescricoes)</td></tr></tbody></table>
   </section>
 
   <section>
     <h2>Frentes — resumo</h2>
-    <p class="cap">Audio: 80 arquivos · Video: 301 gravacoes (161 alertas) ·
-    Vitais: 53 pacientes · Validacao video (CV consenso): AUC=0.832</p>
-    <h3 style="font-size:1rem;color:var(--muted)">Audio por grupo</h3>
+    <p class="cap">Áudio: 80 arquivos · Vídeo: 301 gravações (161 alertas) ·
+    Vitais: 53 pacientes · Validação vídeo (CV consenso): AUC=0.832</p>
+    <h3 style="font-size:1rem;color:var(--muted)">Áudio por grupo</h3>
     <table><thead><tr><th>grupo</th><th>n</th><th>wer</th><th>pausa</th></tr></thead><tbody><tr><td>dysarthria</td><td>40</td><td>0.242</td><td>0.469</td></tr><tr><td>healthy</td><td>40</td><td>0.026</td><td>0.347</td></tr></tbody></table>
     <h3 style="font-size:1rem;color:var(--muted);margin-top:1rem">Vitais — top risco</h3>
     <table><thead><tr><th>paciente</th><th>n_alertas</th><th>segundos_em_alerta</th><th>escore_risco</th><th>severidade_maxima</th><th>tipos</th></tr></thead><tbody><tr><td>49</td><td>1</td><td>480</td><td>1.0</td><td>alta</td><td>hipoxemia</td></tr><tr><td>13</td><td>3</td><td>415</td><td>1.0</td><td>alta</td><td>bradipneia|sinal_congelado</td></tr><tr><td>32</td><td>1</td><td>480</td><td>1.0</td><td>alta</td><td>hipoxemia_grave</td></tr><tr><td>33</td><td>3</td><td>145</td><td>0.7099</td><td>media</td><td>padrao_atipico</td></tr><tr><td>16</td><td>1</td><td>55</td><td>0.6667</td><td>media</td><td>sinal_congelado</td></tr><tr><td>44</td><td>2</td><td>120</td><td>0.6667</td><td>media</td><td>sinal_congelado</td></tr><tr><td>7</td><td>2</td><td>290</td><td>0.6667</td><td>media</td><td>sinal_congelado</td></tr><tr><td>9</td><td>2</td><td>345</td><td>0.6667</td><td>media</td><td>sinal_congelado</td></tr></tbody></table>
@@ -71,21 +71,20 @@
   <section>
     <h2>Fluxo do alerta</h2>
     <div class="flow">
-      <div>1. Coleta multimodal (audio, video, vitais, prescricoes)</div>
-      <div>2. Deteccao por frente → escore em [0, 1]</div>
-      <div>3. Fusao ponderada em paciente sintetico (0.20 / 0.30 / 0.30 / 0.20)</div>
+      <div>1. Coleta multimodal (áudio, vídeo, vitais, prescrições)</div>
+      <div>2. Detecção por frente → escore em [0, 1]</div>
+      <div>3. Fusão ponderada em paciente sintético (0.20 / 0.30 / 0.30 / 0.20)</div>
       <div>4. Fila acima → severidade alta se risco ≥ 0,75 ou ≥2 frentes</div>
       <div>5. Este dashboard hospedado no Hugging Face Spaces (camada gerenciada)</div>
     </div>
   </section>
 
   <footer>
-    Repositorio: deborapoh/fiap-fase4 · App Streamlit local:
+    Repositório: deborapoh/fiap-fase4 · App Streamlit local:
     <code>streamlit run app/streamlit_app.py</code>
   </footer>
 </main>
 <script>
-// destaca severidade
 document.querySelectorAll('td').forEach(td => {
   const t = td.textContent.trim();
   if (t === 'alta') td.className = 'alta';
