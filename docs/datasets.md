@@ -143,8 +143,8 @@ Tres armadilhas, todas ja tratadas em `src/anomaly/sinais_vitais.py`:
 - Ha faltantes, concentrados em `PULSE` e `SpO2`: 413 valores em 102 mil
   leituras, sempre em trechos curtos de perda do oximetro.
 - **Nao ha rotulo de anomalia.** Nenhum evento vem anotado, o que impede medir
-  acerto diretamente. Por isso a validacao usa anomalia injetada, decisao
-  descrita em [handoff.md](handoff.md).
+  acerto diretamente. Por isso a validacao usa anomalia injetada (ver
+  metodologia no [relatorio tecnico](../reports/relatorio_tecnico.md)).
 
 ## Prescricoes: MIMIC-IV Demo
 

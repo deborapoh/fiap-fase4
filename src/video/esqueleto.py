@@ -3,7 +3,8 @@
 O enunciado pede OpenPose. O Keraal ja traz os keypoints por frame no formato
 nomeado (Head, lShoulder, rElbow, ...), derivados do OpenPose COCO. Consumimos
 esses JSONs diretamente, sem compilar o OpenPose — decisao documentada no
-handoff. Coordenadas vem normalizadas em [0, 1] relativamente ao frame.
+relatorio tecnico. Coordenadas vem normalizadas em [0, 1] relativamente ao
+frame.
 
 Os angulos que sustentam a comparacao paciente vs saudavel:
 
