@@ -1,0 +1,2 @@
+recorte,n,n_com_erro,n_sem_erro,folds,acuracia,precisao,revocacao,f1,auc
+cv_consenso_g1a,189,100,89,5,0.778,0.802,0.77,0.786,0.832
